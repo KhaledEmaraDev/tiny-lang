@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "lang/tiny.hh"
 
@@ -39,7 +41,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::newFile()
 {
     if (shouldSave()) {
+        tinyEditor->clearErrors();
         tinyEditor->clear();
+        tokensEditor->clearErrors();
         tokensEditor->clear();
         setCurrentFile(QString());
     }
@@ -49,10 +53,10 @@ void MainWindow::open()
 {
     if (shouldSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
-            tr("Open File"),
-            "../tiny-lang/data",
-            "Tiny files (*.tiny)"
-        );
+                                                        tr("Open File"),
+                                                        "../../tiny-lang/editor/data",
+                                                        "Tiny files (*.tiny)"
+                                                        );
 
         if (!fileName.isEmpty())
             loadFile(fileName);
@@ -70,10 +74,10 @@ bool MainWindow::save()
 bool MainWindow::saveAs()
 {
     QFileDialog dialog(this,
-        tr("Save File As"),
-        "../tiny-lang/data",
-        "Tiny files (*.tiny)"
-    );
+                       tr("Save File As"),
+                       "../../tiny-lang/editor/data",
+                       "Tiny files (*.tiny)"
+                       );
 
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -87,8 +91,8 @@ bool MainWindow::saveAs()
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About Tiny Editor"),
-        tr("<p>This <b>Tiny Editor</b> is part of a project under the " \
-        "<b>Systems Software</b> course.</p>"));
+                       tr("<p>This <b>Tiny Editor</b> is part of a project under the " \
+                          "<b>Systems Software</b> course.</p>"));
 }
 
 void MainWindow::documentWasModified()
@@ -96,10 +100,59 @@ void MainWindow::documentWasModified()
     setWindowModified(tinyEditor->document()->isModified());
 }
 
+bool MainWindow::parseFile()
+{
+    tinyEditor->clearErrors();
+    tokensEditor->clearErrors();
+
+#ifndef QT_NO_CURSOR
+    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+    try {
+        Tiny language = Tiny(tinyEditor->toPlainText().toStdString());
+        auto tokens = language.get_tokens();
+
+        std::stringstream tokenList;
+        for (const auto &token: tokens) {
+            tokenList << token << std::endl;
+        }
+
+        tokensEditor->setPlainText(QString::fromStdString(tokenList.str()));
+
+#ifndef QT_NO_CURSOR
+        QGuiApplication::restoreOverrideCursor();
+#endif
+
+        tabber->setCurrentIndex(1);
+
+        return true;
+    } catch (const std::vector<std::pair<int, std::string>> &ex) {
+        bool modified = tinyEditor->document()->isModified();
+        for (const auto &error: ex) {
+            tinyEditor->displayError(error.first, QString::fromStdString(error.second));
+        }
+        tinyEditor->document()->setModified(modified);
+        documentWasModified();
+    } catch (const std::exception &ex) {
+        statusBar()->showMessage(tr(ex.what()));
+    } catch (const std::string &ex) {
+        statusBar()->showMessage(tr(ex.c_str()));
+    } catch (const QString &ex) {
+        statusBar()->showMessage(ex);
+    } catch (...) {
+        statusBar()->showMessage(tr("An unexpected error occurred"));
+    }
+#ifndef QT_NO_CURSOR
+    QGuiApplication::restoreOverrideCursor();
+#endif
+
+    return false;
+}
+
 void MainWindow::setupEditor()
 {
     QFont font;
-    font.setFamily("mono");
+    font.setFamily("monospace");
     font.setFixedPitch(true);
     font.setPointSize(10);
 
@@ -114,9 +167,14 @@ void MainWindow::setupEditor()
     tokensEditor = new CodeEditor;
     tokensEditor->setFont(font);
 
+    parseTreeView = new ScrollableGraphicsView;
+    parseTree = new ParseTreeGraph(parseTreeView);
+    parseTreeView->setScene(parseTree->qgvScene);
+
     tabber = new QTabWidget(this);
     tabber->addTab(tinyEditor, "Tiny File");
     tabber->addTab(tokensEditor, "Tokens");
+    tabber->addTab(parseTreeView, "Parse Tree");
 }
 
 void MainWindow::setupActions()
@@ -167,7 +225,7 @@ void MainWindow::setupActions()
     QAction *cutAct = new QAction(cutIcon, tr("Cu&t"), this);
     cutAct->setShortcuts(QKeySequence::Cut);
     cutAct->setStatusTip(tr("Cut the current selection's contents to the "
-                                "clipboard"));
+                            "clipboard"));
     connect(cutAct, &QAction::triggered, tinyEditor, &CodeEditor::cut);
     editMenu->addAction(cutAct);
     editToolBar->addAction(cutAct);
@@ -176,7 +234,7 @@ void MainWindow::setupActions()
     QAction *copyAct = new QAction(copyIcon, tr("&Copy"), this);
     copyAct->setShortcuts(QKeySequence::Copy);
     copyAct->setStatusTip(tr("Copy the current selection's contents to the "
-                                 "clipboard"));
+                             "clipboard"));
     connect(copyAct, &QAction::triggered, tinyEditor, &CodeEditor::copy);
     editMenu->addAction(copyAct);
     editToolBar->addAction(copyAct);
@@ -185,13 +243,26 @@ void MainWindow::setupActions()
     QAction *pasteAct = new QAction(pasteIcon, tr("&Paste"), this);
     pasteAct->setShortcuts(QKeySequence::Paste);
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
-                                  "selection"));
+                              "selection"));
     connect(pasteAct, &QAction::triggered, tinyEditor, &CodeEditor::paste);
     editMenu->addAction(pasteAct);
     editToolBar->addAction(pasteAct);
 
     menuBar()->addSeparator();
 #endif
+
+    QMenu *codeMenu = menuBar()->addMenu(tr("&Code"));
+    QToolBar *codeToolBar = addToolBar(tr("Code"));
+
+    const QIcon parseIcon = QIcon(":/images/parse.png");
+    QAction *parseAct = new QAction(parseIcon, tr("&Parse"), this);
+    parseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_P));
+    parseAct->setStatusTip(tr("Extraxt Tokens and Print Parse Tree"));
+    connect(parseAct, &QAction::triggered, this, &MainWindow::parseFile);
+    codeMenu->addAction(parseAct);
+    codeToolBar->addAction(parseAct);
+
+    menuBar()->addSeparator();
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
@@ -220,10 +291,10 @@ bool MainWindow::shouldSave()
 
     const QMessageBox::StandardButton ret
             = QMessageBox::warning(this, tr("Tiny Editor"),
-                tr("The document has been modified.\n"
-                "Do you want to save your changes?"),
-                QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel
-              );
+                                   tr("The document has been modified.\n"
+                                      "Do you want to save your changes?"),
+                                   QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel
+                                   );
 
     switch (ret) {
     case QMessageBox::Save:
@@ -245,8 +316,8 @@ void MainWindow::loadFile(const QString &fileName)
 
         if (!file.open(QFile::ReadOnly | QFile::Text)) {
             QMessageBox::warning(this, tr("Tiny Editor"),
-                tr("Cannot read file %1:\n%2.")
-                    .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+                                 tr("Cannot read file %1:\n%2.")
+                                 .arg(QDir::toNativeSeparators(fileName), file.errorString()));
             return;
         }
 
@@ -254,17 +325,8 @@ void MainWindow::loadFile(const QString &fileName)
 #ifndef QT_NO_CURSOR
         QGuiApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
+        tinyEditor->clearErrors();
         tinyEditor->setPlainText(in.readAll());
-
-        Tiny language = Tiny(tinyEditor->toPlainText().toStdString());
-        auto tokens = language.get_tokens();
-
-        std::stringstream tokenList;
-        for (const auto &token: tokens) {
-            tokenList << token << std::endl;
-        }
-
-        tokensEditor->setPlainText(QString::fromStdString(tokenList.str()));
 #ifndef QT_NO_CURSOR
         QGuiApplication::restoreOverrideCursor();
 #endif
@@ -296,7 +358,7 @@ bool MainWindow::saveFile(const QString &fileName)
 
             if (!file.commit()) {
                 errorMessage = tr("Cannot write file %1:\n%2.")
-                    .arg(QDir::toNativeSeparators(fileName), file.errorString());
+                        .arg(QDir::toNativeSeparators(fileName), file.errorString());
             }
         } else {
             errorMessage = tr("Cannot open file %1 for writing:\n%2.")

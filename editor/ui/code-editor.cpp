@@ -17,7 +17,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 }
 
 void CodeEditor::displayError(int line, const QString &msg) {
-    QTextCursor errorCursor(document()->findBlockByLineNumber(line / 2));
+    QTextCursor errorCursor(document()->findBlockByLineNumber(line - 1));
     errorCursor.movePosition(QTextCursor::EndOfLine);
 
     QTextCharFormat errorFormat;
@@ -53,8 +53,11 @@ void CodeEditor::clearErrors() {
     for (auto &selection: errorSelections) {
         selection.cursor.removeSelectedText();
     }
-
     errorSelections.clear();
+
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    extraSelections.append(currentLineSelection);
+    setExtraSelections(extraSelections);
 }
 
 int CodeEditor::lineNumberAreaWidth()

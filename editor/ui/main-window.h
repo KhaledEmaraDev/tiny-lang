@@ -5,6 +5,8 @@
 
 #include "code-editor.h"
 #include "tiny-highlighter.h"
+#include "scrollable-graphics-view.h"
+#include "parsetree-graph.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -22,6 +24,8 @@ public:
 
     void loadFile(const QString &fileName);
 
+ParseTreeGraph *parseTree;
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -32,6 +36,9 @@ private slots:
     bool saveAs();
     void about();
     void documentWasModified();
+
+    bool parseFile();
+
 #ifndef QT_NO_SESSIONMANAGER
     void commitData(QSessionManager &);
 #endif
@@ -40,6 +47,7 @@ private:
     void setupEditor();
     void setupActions();
     void setupStatusBar();
+
     bool shouldSave();
     bool saveFile(const QString &fileName);
     void setCurrentFile(const QString &fileName);
@@ -48,6 +56,8 @@ private:
     CodeEditor *tinyEditor;
     TinyHighlighter *tinyHighlighter;
     CodeEditor *tokensEditor;
+    ScrollableGraphicsView *parseTreeView;
+
     QString curFile;
 };
 
