@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "token.hh"
 
@@ -23,6 +24,9 @@ public:
     if (m_errors.size() > 0)
       throw m_errors;
 
+	for(int i = 0; i < m_tokens.size(); ++i) {
+		std::cout << m_tokens[i].get_token_value() << " " << m_tokens[i].get_token_type() << std::endl;
+	}
     return m_tokens;
   }
 

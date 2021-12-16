@@ -3,8 +3,6 @@
 #include <ostream>
 #include <string>
 
-#include "magic_enum.hh"
-
 class Token {
 public:
   enum Type {
@@ -39,9 +37,17 @@ public:
       : m_type(type), m_line(line), m_lexeme(lexeme), m_literal(literal) {}
 
   friend std::ostream &operator<<(std::ostream &stream, const Token &token) {
-    stream << token.m_lexeme << "," << magic_enum::enum_name(token.m_type);
+    stream << token.m_lexeme << "," << token.m_type;
 
     return stream;
+  }
+
+  Type get_token_type() {
+	  return m_type;
+  }
+
+  std::string get_token_value() {
+	  return m_lexeme;
   }
 
 private:

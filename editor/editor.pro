@@ -29,7 +29,6 @@ SOURCES += \
 
 HEADERS += \
     lang/lexer.hh \
-    lang/magic_enum.hh\
     lang/tiny.hh\
     lang/token.hh\
     ui/code-editor.h \
