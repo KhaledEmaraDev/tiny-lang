@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "token.hh"
+#include "parser.hh"
 
 class Lexer {
 public:
@@ -24,10 +25,17 @@ public:
     if (m_errors.size() > 0)
       throw m_errors;
 
+
+	// for testing
 	for(int i = 0; i < m_tokens.size(); ++i) {
 		std::cout << m_tokens[i].get_token_value() << " " << m_tokens[i].get_token_type() << std::endl;
 	}
-    return m_tokens;
+	auto parser = new Parser(m_tokens);
+	TreeNode node = parser->program();
+	node.print_tree();
+	// End testing
+
+  return m_tokens;
   }
 
 private:

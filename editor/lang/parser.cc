@@ -1,6 +1,8 @@
 #include "parser.hh"
 #include "token.hh"
 
+#include <iostream>
+
 void Parser::match(Token::Type expected_type) {
   if (m_tokens[m_current_idx].get_token_type() == expected_type) {
     advance();
@@ -8,11 +10,13 @@ void Parser::match(Token::Type expected_type) {
 }
 
 TreeNode Parser::program() {
+  std::cout << "program() entered" << std::endl;
   TreeNode root_node = stmt_sequence();
   return root_node;
 }
 
 TreeNode Parser::stmt_sequence() {
+  std::cout << "stmt_sequence() entered" << std::endl;
   TreeNode node1, node2;
   node1 = statement();
 
@@ -26,6 +30,7 @@ TreeNode Parser::stmt_sequence() {
 }
 
 TreeNode Parser::statement() {
+  std::cout << "statement() entered" << std::endl;
   TreeNode node;
   Token::Type token_type = m_tokens[m_current_idx].get_token_type();
 
@@ -45,6 +50,7 @@ TreeNode Parser::statement() {
 }
 
 TreeNode Parser::if_stmt() {
+  std::cout << "if_stmt() entered" << std::endl;
   TreeNode node, new_node;
   node.set_token(Token::Type::IF, "if");
   node.set_shape("RECTANGLE");
@@ -79,6 +85,7 @@ TreeNode Parser::if_stmt() {
 }
 
 TreeNode Parser::repeat_stmt() {
+  std::cout << "repeat_stmt() entered" << std::endl;
   TreeNode node;
   node.set_token(Token::Type::REPEAT, "repeat");
   node.set_shape("RECTANGLE");
@@ -97,6 +104,7 @@ TreeNode Parser::repeat_stmt() {
 }
 
 TreeNode Parser::assign_stmt() {
+  std::cout << "assign_stmt() entered" << std::endl;
   TreeNode node;
   std::string token_value = m_tokens[m_current_idx].get_token_value();
   node.set_token(Token::Type::ASSIGN, token_value);
@@ -112,6 +120,7 @@ TreeNode Parser::assign_stmt() {
 }
 
 TreeNode Parser::read_stmt() {
+  std::cout << "read_stmt() entered" << std::endl;
   TreeNode node;
   match(Token::Type::READ);
   std::string token_value = m_tokens[m_current_idx].get_token_value();
@@ -125,6 +134,7 @@ TreeNode Parser::read_stmt() {
 }
 
 TreeNode Parser::write_stmt() {
+  std::cout << "write_stmt() entered" << std::endl;
   TreeNode node;
   node.set_token(Token::Type::WRITE, "write");
   node.set_shape("RECTANGLE");
@@ -137,6 +147,7 @@ TreeNode Parser::write_stmt() {
 }
 
 TreeNode Parser::exp() {
+  std::cout << "exp() entered" << std::endl;
   TreeNode node, new_node;
   node = simple_exp();
 
@@ -153,6 +164,7 @@ TreeNode Parser::exp() {
 }
 
 TreeNode Parser::comparison_op() {
+  std::cout << "comparison_op() entered" << std::endl;
   TreeNode node;
   node.set_shape("ELLIPSE");
 
@@ -170,6 +182,7 @@ TreeNode Parser::comparison_op() {
 }
 
 TreeNode Parser::simple_exp() {
+  std::cout << "simple_exp() entered" << std::endl;
   TreeNode node, new_node;
   node = term();
 
@@ -180,11 +193,13 @@ TreeNode Parser::simple_exp() {
     new_node.add_child(node);
     new_node.add_child(term());
     node = new_node;
+    token_type = m_tokens[m_current_idx].get_token_type();
   }
   return node;
 }
 
 TreeNode Parser::add_op() {
+  std::cout << "add_op() entered" << std::endl;
   TreeNode node;
   node.set_shape("ELLIPSE");
 
@@ -202,6 +217,7 @@ TreeNode Parser::add_op() {
 }
 
 TreeNode Parser::term() {
+  std::cout << "term() entered" << std::endl;
   TreeNode node, new_node;
   node = factor();
 
@@ -212,12 +228,14 @@ TreeNode Parser::term() {
     new_node.add_child(node);
     new_node.add_child(factor());
     node = new_node;
+    token_type = m_tokens[m_current_idx].get_token_type();
   }
 
   return node;
 }
 
 TreeNode Parser::mul_op() {
+  std::cout << "mul_op() entered" << std::endl;
   TreeNode node;
   node.set_shape("ELLIPSE");
 
@@ -235,6 +253,7 @@ TreeNode Parser::mul_op() {
 }
 
 TreeNode Parser::factor() {
+  std::cout << "factor() entered" << std::endl;
   TreeNode node;
   Token::Type token_type = m_tokens[m_current_idx].get_token_type();
 
@@ -244,12 +263,12 @@ TreeNode Parser::factor() {
     match(Token::Type::CLOSEDBRACKET);
   } else if (token_type == Token::Type::NUMBER) {
     std::string token_value = m_tokens[m_current_idx].get_token_value();
-    node.set_token(Token::Type::NUMBER, token_value); 
+    node.set_token(Token::Type::NUMBER, token_value);
     node.set_shape("ELLIPSE");
     match(Token::Type::NUMBER);
   } else if (token_type == Token::Type::IDENTIFIER) {
     std::string token_value = m_tokens[m_current_idx].get_token_value();
-    node.set_token(Token::Type::IDENTIFIER, token_value); 
+    node.set_token(Token::Type::IDENTIFIER, token_value);
     node.set_shape("ELLIPSE");
     match(Token::Type::IDENTIFIER);
   }

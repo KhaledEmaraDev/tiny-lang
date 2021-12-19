@@ -31,15 +31,32 @@ public:
     // Other
     NUMBER,
     IDENTIFIER,
+    NONE
   };
 
   Token(Type type, int line, std::string lexeme, std::string literal)
       : m_type(type), m_line(line), m_lexeme(lexeme), m_literal(literal) {}
 
+  Token() : Token(NONE, 0, "", "") {}
+
+  Token(Type type, std::string lexeme) : m_type(type), m_lexeme(lexeme) {}
+
   friend std::ostream &operator<<(std::ostream &stream, const Token &token) {
     stream << token.m_lexeme << "," << token.m_type;
 
     return stream;
+  }
+
+  void set_token_type(Type type) {
+    m_type = type;
+  }
+
+  void set_token_value(std::string lexeme) {
+    m_lexeme = lexeme;
+  }
+
+  void set_token_literal(std::string literal) {
+	m_literal = literal;
   }
 
   Type get_token_type() {
@@ -50,9 +67,13 @@ public:
 	  return m_lexeme;
   }
 
+  std::string get_token_literal() {
+	  return m_literal;
+  }
+
 private:
-  const Type m_type;
-  const int m_line;
-  const std::string m_lexeme;
-  const std::string m_literal;
+  Type m_type;
+  int m_line;
+  std::string m_lexeme;
+  std::string m_literal;
 };

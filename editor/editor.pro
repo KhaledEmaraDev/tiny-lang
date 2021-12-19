@@ -21,6 +21,8 @@ DEPENDPATH += $$PWD/../QGVCore
 SOURCES += \
     main.cpp \
     lang/lexer.cc \
+    lang/parser.cc\
+    lang/treeNode.cc\
     ui/code-editor.cpp \
     ui/main-window.cpp \
     ui/parsetree-graph.cpp \
@@ -31,6 +33,8 @@ HEADERS += \
     lang/lexer.hh \
     lang/tiny.hh\
     lang/token.hh\
+    lang/parser.hh\
+    lang/treeNode.hh\
     ui/code-editor.h \
     ui/main-window.h \
     ui/parsetree-graph.h \
