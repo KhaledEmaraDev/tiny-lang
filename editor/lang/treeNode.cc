@@ -57,22 +57,22 @@ void TreeNode::add_sibling(TreeNode sibling) {
 
 void TreeNode::print_tree() {
   // Printing the token value and token node of the current node.
-  std::cout << this->m_token_node.get_token_value() << " "
-            << this->m_token_node.get_token_type() << std::endl;
+  std::cout << this->m_token_node.get_token_value() << ","
+            << this->m_token_node.get_token_literal() << std::endl;
 
   // Printing the children of current node if exists.
   for (int i = 0; i < m_children.size(); ++i) {
     std::cout << "child number " << i << " of "
-              << this->m_token_node.get_token_type()
-              << " is : " << m_children[i]->get_token().get_token_value() << " "
-              << m_children[i]->get_token().get_token_type() << std::endl;
+              << this->m_token_node.get_token_literal()
+              << " is : " << m_children[i]->get_token().get_token_value() << ","
+              << m_children[i]->get_token().get_token_literal() << std::endl;
     
     m_children[i]->print_tree();
   }
 
   // Printing the sibling of current node if exists.
   if (m_sibling != nullptr) {
-    std::cout << "Sibling of " << this->m_token_node.get_token_type()
+    std::cout << "Sibling of " << this->m_token_node.get_token_literal()
               << " is : ";
     m_sibling->print_tree();
   }

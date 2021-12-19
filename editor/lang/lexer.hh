@@ -28,7 +28,7 @@ public:
 
 	// for testing
 	for(int i = 0; i < m_tokens.size(); ++i) {
-		std::cout << m_tokens[i].get_token_value() << " " << m_tokens[i].get_token_type() << std::endl;
+		std::cout << m_tokens[i].get_token_value() << " " << m_tokens[i].get_token_literal() << std::endl;
 	}
 	auto parser = new Parser(m_tokens);
 	TreeNode node = parser->program();
