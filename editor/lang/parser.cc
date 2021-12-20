@@ -46,6 +46,8 @@ TreeNode Parser::statement() {
     node = write_stmt();
   }
 
+  std::cout << "statmenet() finished" << std::endl;
+
   return node;
 }
 
@@ -94,7 +96,6 @@ TreeNode Parser::repeat_stmt() {
 
   TreeNode stmt_node = stmt_sequence();
   node.add_child(stmt_node);
-
   match(Token::Type::UNTIL);
 
   TreeNode exp_node = exp();
@@ -142,7 +143,9 @@ TreeNode Parser::write_stmt() {
   match(Token::Type::WRITE);
 
   TreeNode exp_node = exp();
+  std::cout << "write_stmt() again" << std::endl;
   node.add_child(exp_node);
+  std::cout << "write_stmt() finished" << std::endl;
   return node;
 }
 

@@ -15,7 +15,7 @@ void TreeNode::add_child(TreeNode child) {
 
   // Adding sibling of the incoming node if exist.
   if (child.m_sibling != nullptr) {
-    m_children[-size - 1]->add_sibling(*child.m_sibling);
+    m_children[size - 1]->add_sibling(*child.m_sibling);
   }
 }
 
@@ -35,7 +35,7 @@ void TreeNode::add_sibling(TreeNode sibling) {
   TreeNode *t_ptr = this;
 
   // Traverse through all existing siblings until we reach the last sibling.
-  while (this->m_sibling != nullptr) {
+  while (t_ptr->m_sibling != nullptr) {
     t_ptr = t_ptr->m_sibling;
   }
 
