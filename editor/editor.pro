@@ -1,4 +1,6 @@
-QT       += core gui
+QT       += core gui svg
+
+qtHaveModule(opengl): QT += opengl
 
 #requires(qtConfig(filedialog))
 
@@ -25,8 +27,7 @@ SOURCES += \
     lang/treeNode.cc\
     ui/code-editor.cpp \
     ui/main-window.cpp \
-    ui/parsetree-graph.cpp \
-    ui/scrollable-graphics-view.cpp \
+    ui/svg-view.cpp \
     ui/tiny-highlighter.cpp
 
 HEADERS += \
@@ -37,8 +38,8 @@ HEADERS += \
     lang/treeNode.hh\
     ui/code-editor.h \
     ui/main-window.h \
-    ui/parsetree-graph.h \
-    ui/scrollable-graphics-view.h \
+    ui/render-thread.h \
+    ui/svg-view.h \
     ui/tiny-highlighter.h
 
 RESOURCES = application.qrc

@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 #include <QTextStream>
+#include <QDebug>
 
 #include <iostream>
 #include <sstream>
@@ -9,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "ui/render-thread.h"
 #include "lang/tiny.hh"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -149,6 +151,28 @@ bool MainWindow::parseFile()
     return false;
 }
 
+void MainWindow::renderTree()
+{
+    RenderThread *renderThread = new RenderThread("");
+    connect(renderThread, &RenderThread::renderFinished, this, &MainWindow::handleRender);
+    connect(renderThread, &RenderThread::finished, renderThread, &QObject::deleteLater);
+    renderThread->start();
+}
+
+bool MainWindow::handleRender(QString result) {
+    Q_UNUSED(result)
+
+    if (!QFileInfo::exists("parsetree.svg") || !parseTreeView->openFile("parsetree.svg")) {
+        QMessageBox::critical(this, tr("Render Parse Tree"),
+                              tr("Couldn't load tree."));
+        return false;
+    }
+
+    tabber->setCurrentIndex(2);
+
+    return true;
+}
+
 void MainWindow::setupEditor()
 {
     QFont font;
@@ -167,9 +191,13 @@ void MainWindow::setupEditor()
     tokensEditor = new CodeEditor;
     tokensEditor->setFont(font);
 
-    parseTreeView = new ScrollableGraphicsView;
-    parseTree = new ParseTreeGraph(parseTreeView);
-    parseTreeView->setScene(parseTree->qgvScene);
+    parseTreeView = new SvgView;
+    parseTreeView->setAntialiasing(true);
+#ifndef QT_NO_OPENGL
+    parseTreeView->setRenderer(SvgView::OpenGL);
+#else
+    parseTreeView->setRenderer(SvgView::Native);
+#endif
 
     tabber = new QTabWidget(this);
     tabber->addTab(tinyEditor, "Tiny File");
@@ -261,6 +289,14 @@ void MainWindow::setupActions()
     connect(parseAct, &QAction::triggered, this, &MainWindow::parseFile);
     codeMenu->addAction(parseAct);
     codeToolBar->addAction(parseAct);
+
+    const QIcon renderIcon = QIcon(":/images/parse.png");
+    QAction *renderAct = new QAction(renderIcon, tr("&Render"), this);
+    renderAct->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
+    renderAct->setStatusTip(tr("Render Parse Tree"));
+    connect(renderAct, &QAction::triggered, this, &MainWindow::renderTree);
+    codeMenu->addAction(renderAct);
+    codeToolBar->addAction(renderAct);
 
     menuBar()->addSeparator();
 
