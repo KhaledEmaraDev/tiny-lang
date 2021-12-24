@@ -42,7 +42,7 @@ public:
   Token(Type type, std::string lexeme) : m_type(type), m_lexeme(lexeme) {}
 
   friend std::ostream &operator<<(std::ostream &stream, const Token &token) {
-	stream << token.m_lexeme << "," << token.m_type;
+    stream << token.m_lexeme << "," << token.m_type;
 
     return stream;
   }
@@ -96,7 +96,7 @@ public:
 
   Type get_token_type() { return m_type; }
 
-  std::string get_token_literal() {return m_literal;}
+  std::string get_token_literal() { return m_literal; }
 
   std::string get_token_value() { return m_lexeme; }
 

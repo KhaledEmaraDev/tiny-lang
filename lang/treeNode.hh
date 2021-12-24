@@ -7,8 +7,7 @@ class TreeNode {
 public:
   TreeNode() : m_sibling(nullptr) {}
 
-  TreeNode(Token token)
-      : m_token_node(token), m_sibling(nullptr) {}
+  TreeNode(Token token) : m_token_node(token), m_sibling(nullptr) {}
 
   TreeNode(Token::Type token_type, std::string token_value)
       : m_sibling(nullptr) {
@@ -35,7 +34,7 @@ public:
 
   TreeNode operator=(const TreeNode &copy_node);
   Token get_token() { return m_token_node; }
-  std::vector<TreeNode *> get_node_children() {return m_children;}
+  std::vector<TreeNode *> get_node_children() { return m_children; }
 
 private:
   Token m_token_node;

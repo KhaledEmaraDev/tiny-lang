@@ -66,7 +66,7 @@ void TreeNode::print_tree() {
               << this->m_token_node.get_token_literal()
               << " is : " << m_children[i]->get_token().get_token_value() << ","
               << m_children[i]->get_token().get_token_literal() << std::endl;
-    
+
     m_children[i]->print_tree();
   }
 
