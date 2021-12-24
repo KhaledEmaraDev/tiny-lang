@@ -3,6 +3,7 @@
 #include <ostream>
 #include <string>
 
+using namespace std;
 class Token {
 public:
   enum Type {
@@ -42,7 +43,7 @@ public:
   Token(Type type, std::string lexeme) : m_type(type), m_lexeme(lexeme) {}
 
   friend std::ostream &operator<<(std::ostream &stream, const Token &token) {
-    stream << token.m_lexeme << "," << token.m_type;
+    stream << token.m_lexeme << "," << Token::type_name[token.m_type];
 
     return stream;
   }
@@ -101,6 +102,13 @@ public:
   std::string get_token_value() { return m_lexeme; }
 
 private:
+  inline static const string type_name[] = {
+      "IF",        "THEN",     "ELSE",        "END",
+      "REPEAT",    "UNTIL",    "READ",        "WRITE",
+      "PLUS",      "MINUS",    "MULT",        "DIV",
+      "EQUAL",     "LESSTHAN", "OPENBRACKET", "CLOSEDBRACKET",
+      "SEMICOLON", "ASSIGN",   "NUMBER",      "IDENTIFIER",
+      "NONE"};
   Type m_type;
   int m_line;
   std::string m_lexeme;
