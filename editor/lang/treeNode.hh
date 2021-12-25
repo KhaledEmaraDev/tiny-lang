@@ -4,7 +4,9 @@
 #include <vector>
 
 class TreeNode {
+  
 public:
+  static int nodesCount;
   TreeNode() : m_sibling(nullptr) {}
 
   TreeNode(Token token)
@@ -15,6 +17,8 @@ public:
     Token token;
     token.set_token_type(token_type);
     token.set_token_value(token_value);
+    nodesCount++;
+    id = nodesCount;
     m_token_node = token;
   }
 
@@ -37,9 +41,14 @@ public:
   Token get_token() { return m_token_node; }
   std::vector<TreeNode *> get_node_children() {return m_children;}
 
-private:
+  
+  // We need to fix add_child function to take pointer
+  // Will access private members directly for now
+
+// private:
   Token m_token_node;
   std::vector<TreeNode *> m_children;
   TreeNode *m_sibling;
   std::string m_shape;
+  int id;
 };
