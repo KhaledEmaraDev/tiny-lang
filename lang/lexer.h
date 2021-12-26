@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _LEXER_H_
+#define _LEXER_H_
 
 #include <cctype>
 #include <cstdio>
@@ -9,8 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "parser.hh"
-#include "token.hh"
+#include "parser.h"
+#include "token.h"
 
 class Lexer {
 public:
@@ -27,12 +28,12 @@ public:
 
     // for testing
     for (int i = 0; i < m_tokens.size(); ++i) {
-      std::cout << m_tokens[i].get_token_value() << " "
-                << m_tokens[i].get_token_literal() << std::endl;
+      std::cout << m_tokens[i].value() << " "
+                << m_tokens[i].literal() << std::endl;
     }
     auto parser = new Parser(m_tokens);
-    TreeNode node = parser->program();
-    node.print_tree();
+    TreeNode * node = parser->parse();
+    node->print();
     // End testing
 
     return m_tokens;
@@ -71,7 +72,7 @@ private:
   void push_token_back(Token::Type type, std::string literal) {
     std::string lexeme =
         m_source_code.substr(m_start_idx, m_current_idx - m_start_idx);
-    m_tokens.push_back(Token(type, m_current_line, lexeme, literal));
+    m_tokens.push_back(Token(type, lexeme));
   }
 
   void log_error(int line, std::string message) {
@@ -89,3 +90,5 @@ private:
 
   static const std::unordered_map<std::string, Token::Type> keywords;
 };
+
+#endif

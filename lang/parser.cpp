@@ -1,38 +1,28 @@
-#include "parser.hh"
-#include "token.hh"
+#include "parser.h"
+#include "token.h"
 
 #include <iostream>
 
-void Parser::match(Token::Type expected_type) {
-  if (m_tokens[m_current_idx].get_token_type() == expected_type) {
-    advance();
-  }
+TreeNode * Parser::parse() {
+  return stmt_sequence();
 }
 
-TreeNode Parser::program() {
-  std::cout << "program() entered" << std::endl;
-  TreeNode root_node = stmt_sequence();
-  return root_node;
-}
+TreeNode * Parser::stmt_sequence() {
+  TreeNode * node = statement();
+  TreeNode * current_node = node;
 
-TreeNode Parser::stmt_sequence() {
-  std::cout << "stmt_sequence() entered" << std::endl;
-  TreeNode node1, node2;
-  node1 = statement();
-
-  while (m_tokens[m_current_idx].get_token_type() == Token::Type::SEMICOLON) {
+  while (m_tokens[m_idx].type() == Token::Type::SEMICOLON) {
     match(Token::Type::SEMICOLON);
-    node2 = statement();
-    node1.add_sibling(node2);
+    current_node->set_sibling(statement());
+    current_node = current_node->sibling();
   }
 
-  return node1;
+  return node;
 }
 
-TreeNode Parser::statement() {
-  std::cout << "statement() entered" << std::endl;
-  TreeNode node;
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+TreeNode * Parser::statement() {
+  TreeNode * node;
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::IF) {
     node = if_stmt();
@@ -44,236 +34,200 @@ TreeNode Parser::statement() {
     node = read_stmt();
   } else if (token_type == Token::Type::WRITE) {
     node = write_stmt();
+  } else {
+    fail();
   }
-
-  std::cout << "statmenet() finished" << std::endl;
 
   return node;
 }
 
-TreeNode Parser::if_stmt() {
-  std::cout << "if_stmt() entered" << std::endl;
-  TreeNode node, new_node;
-  node.set_token(Token::Type::IF, "if");
-  node.set_shape("RECTANGLE");
+TreeNode * Parser::if_stmt() {
+  TreeNode * if_node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
 
   match(Token::Type::IF);
-
-  TreeNode exp_node = exp();
-  node.add_child(exp_node);
-
+  if_node->add_child(exp());
   match(Token::Type::THEN);
+  if_node->add_child(stmt_sequence());
 
-  TreeNode stmt_node = stmt_sequence();
-  node.add_child(stmt_node);
-
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::END) {
-    match(token_type);
+    advance();
   } else if (token_type == Token::Type::ELSE) {
-    new_node.set_token(Token::Type::ELSE, "else");
-    new_node.set_shape("RECTANGLE");
+    TreeNode * else_node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
 
-    match(Token::Type::ELSE);
+    advance();
+    else_node->add_child(stmt_sequence());
 
-    new_node.add_child(stmt_sequence());
-    node.add_child(new_node);
-
+    if_node->add_child(else_node);
     match(Token::Type::END);
+  } else {
+    fail();
   }
 
-  return node;
+  return if_node;
 }
 
-TreeNode Parser::repeat_stmt() {
-  std::cout << "repeat_stmt() entered" << std::endl;
-  TreeNode node;
-  node.set_token(Token::Type::REPEAT, "repeat");
-  node.set_shape("RECTANGLE");
+TreeNode * Parser::repeat_stmt() {
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
 
   match(Token::Type::REPEAT);
-
-  TreeNode stmt_node = stmt_sequence();
-  node.add_child(stmt_node);
+  node->add_child(stmt_sequence());
   match(Token::Type::UNTIL);
-
-  TreeNode exp_node = exp();
-  node.add_child(exp_node);
+  node->add_child(exp());
 
   return node;
 }
 
-TreeNode Parser::assign_stmt() {
-  std::cout << "assign_stmt() entered" << std::endl;
-  TreeNode node;
-  std::string token_value = m_tokens[m_current_idx].get_token_value();
-  node.set_token(Token::Type::ASSIGN, token_value);
-  node.set_shape("RECTANGLE");
+TreeNode * Parser::assign_stmt() {
+  // I not sure but shouldn't it be
+  // TreeNode * node = new TreeNode(Token(Token::Type::ASSIGN, ":="), "RECTANGLE");
+  // node->add_child(new TreeNode(m_tokens[m_idx], "ELLIPSE"))
+  // however
+  Token mysterious_token(Token::Type::ASSIGN, m_tokens[m_idx].value());
+  TreeNode * node = new TreeNode(mysterious_token, "RECTANGLE");
 
   match(Token::Type::IDENTIFIER);
   match(Token::Type::ASSIGN);
 
-  TreeNode exp_node = exp();
-  node.add_child(exp_node);
+  node->add_child(exp());
 
   return node;
 }
 
-TreeNode Parser::read_stmt() {
-  std::cout << "read_stmt() entered" << std::endl;
-  TreeNode node;
+TreeNode * Parser::read_stmt() {
   match(Token::Type::READ);
-  std::string token_value = m_tokens[m_current_idx].get_token_value();
+  Token mysterious_token(Token::Type::READ, m_tokens[m_idx].value());
+  TreeNode * node = new TreeNode(mysterious_token, "RECTANGLE");
 
-  node.set_token(Token::Type::READ, token_value);
-  node.set_shape("RECTANGLE");
+  // Again shouldn't it be
+  // TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+  // match(Token::Type::READ);
+  // node->add_child(new TreeNode(m_tokens[m_idx], "ELLIPSE"));
 
   match(Token::Type::IDENTIFIER);
 
   return node;
 }
 
-TreeNode Parser::write_stmt() {
-  std::cout << "write_stmt() entered" << std::endl;
-  TreeNode node;
-  node.set_token(Token::Type::WRITE, "write");
-  node.set_shape("RECTANGLE");
+TreeNode * Parser::write_stmt() {
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
 
   match(Token::Type::WRITE);
-
-  TreeNode exp_node = exp();
-  std::cout << "write_stmt() again" << std::endl;
-  node.add_child(exp_node);
-  std::cout << "write_stmt() finished" << std::endl;
+  node->add_child(exp());
   return node;
 }
 
-TreeNode Parser::exp() {
-  std::cout << "exp() entered" << std::endl;
-  TreeNode node, new_node;
-  node = simple_exp();
+TreeNode * Parser::exp() {
+  TreeNode * exp_node = simple_exp();
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::LESSTHAN || token_type == Token::Type::EQUAL) {
-    new_node = comparison_op();
-    new_node.add_child(node);
-    new_node.add_child(simple_exp());
-    node = new_node;
+    TreeNode * node = comparison_op();
+    node->add_child(exp_node);
+    node->add_child(simple_exp());
+    exp_node = node;
   }
 
-  return node;
+  return exp_node;
 }
 
-TreeNode Parser::comparison_op() {
-  std::cout << "comparison_op() entered" << std::endl;
-  TreeNode node;
-  node.set_shape("ELLIPSE");
+TreeNode * Parser::comparison_op() {
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::LESSTHAN) {
-    node.set_token(Token::Type::LESSTHAN, "<");
-    match(Token::Type::LESSTHAN);
+    advance();
   } else if (token_type == Token::Type::EQUAL) {
-    node.set_token(Token::Type::EQUAL, "=");
-    match(Token::Type::EQUAL);
+    advance();
+  } else {
+    advance();
   }
 
   return node;
 }
 
-TreeNode Parser::simple_exp() {
-  std::cout << "simple_exp() entered" << std::endl;
-  TreeNode node, new_node;
-  node = term();
+TreeNode * Parser::simple_exp() {
+  TreeNode * term_node = term();
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   while (token_type == Token::Type::PLUS || token_type == Token::Type::MINUS) {
-    new_node = add_op();
-    new_node.add_child(node);
-    new_node.add_child(term());
-    node = new_node;
-    token_type = m_tokens[m_current_idx].get_token_type();
+    TreeNode * node = add_op();
+    node->add_child(term_node);
+    node->add_child(term());
+    term_node = node;
+    token_type = m_tokens[m_idx].type();
   }
-  return node;
+  return term_node;
 }
 
-TreeNode Parser::add_op() {
-  std::cout << "add_op() entered" << std::endl;
-  TreeNode node;
-  node.set_shape("ELLIPSE");
+TreeNode * Parser::add_op() {
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::PLUS) {
-    match(Token::Type::PLUS);
-    node.set_token(Token::Type::PLUS, "+");
+    advance();
   } else if (token_type == Token::Type::MINUS) {
-    match(Token::Type::MINUS);
-    node.set_token(Token::Type::MINUS, "-");
+    advance();
+  } else {
+    fail();
   }
 
   return node;
 }
 
-TreeNode Parser::term() {
-  std::cout << "term() entered" << std::endl;
-  TreeNode node, new_node;
-  node = factor();
+TreeNode * Parser::term() {
+  TreeNode * factor_node = factor();
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   while (token_type == Token::Type::MULT || token_type == Token::Type::DIV) {
-    new_node = mul_op();
-    new_node.add_child(node);
-    new_node.add_child(factor());
-    node = new_node;
-    token_type = m_tokens[m_current_idx].get_token_type();
+    TreeNode * node = mul_op();
+    node->add_child(factor_node);
+    node->add_child(factor());
+    factor_node = node;
+    token_type = m_tokens[m_idx].type();
   }
 
-  return node;
+  return factor_node;
 }
 
-TreeNode Parser::mul_op() {
-  std::cout << "mul_op() entered" << std::endl;
-  TreeNode node;
-  node.set_shape("ELLIPSE");
+TreeNode * Parser::mul_op() {
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
 
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::MULT) {
-    node.set_token(Token::Type::MULT, "*");
-    match(Token::Type::MULT);
+    advance();
   } else if (token_type == Token::Type::DIV) {
-    node.set_token(Token::Type::DIV, "/");
-    match(Token::Type::DIV);
+    advance();
+  } else {
+    fail();
   }
 
   return node;
 }
 
-TreeNode Parser::factor() {
-  std::cout << "factor() entered" << std::endl;
-  TreeNode node;
-  Token::Type token_type = m_tokens[m_current_idx].get_token_type();
+TreeNode * Parser::factor() {
+  TreeNode * node;
+  Token::Type token_type = m_tokens[m_idx].type();
 
   if (token_type == Token::Type::OPENBRACKET) {
-    match(Token::Type::OPENBRACKET);
+    advance();
     node = exp();
     match(Token::Type::CLOSEDBRACKET);
   } else if (token_type == Token::Type::NUMBER) {
-    std::string token_value = m_tokens[m_current_idx].get_token_value();
-    node.set_token(Token::Type::NUMBER, token_value);
-    node.set_shape("ELLIPSE");
-    match(Token::Type::NUMBER);
+    node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+    advance();
   } else if (token_type == Token::Type::IDENTIFIER) {
-    std::string token_value = m_tokens[m_current_idx].get_token_value();
-    node.set_token(Token::Type::IDENTIFIER, token_value);
-    node.set_shape("ELLIPSE");
-    match(Token::Type::IDENTIFIER);
+    node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+    advance();
+  } else {
+     fail();
   }
 
   return node;

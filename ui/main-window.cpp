@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "ui/render-thread.h"
-#include "lang/tiny.hh"
+#include "lang/tiny.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
