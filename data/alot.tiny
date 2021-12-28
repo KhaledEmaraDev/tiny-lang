@@ -4,45 +4,45 @@ x := x + 1;
 x := x - 1;
 x := x * 1;
 x := x / 1;
-x := 1 + 1 + 1 + 1 + 1
+x := 1 + 1 + 1 + 1 + 1;
 
 {expression}
 {arithmetic and brackets}
-x := 1 * 2 / 3 + 4 - 5 + ((6 + 7)) * (((((8))) + x))
+x := 1 * 2 / 3 + 4 - 5 + ((6 + 7)) * (((((8))) + x));
 {arithmetic and comparison}
-x := (((0 = 1))) + 1 / (0 < 0)
+x := (((0 = 1))) + 1 / (0 < 0);
 {comparison without brackets}
-x := 0 = 0
+x := 0 = 0;
 {multiple comaprison expressions}
-x := 0 = (((((0 < 0) < 0) < 0) = 0) = 0)
+x := 0 = (((((0 < 0) < 0) < 0) = 0) = 0);
 
 {read}
-read x
-read AZaz
+read x;
+read AZaz;
 
 {write}
-write x
+write x;
 
 {if statement}
 {operations in exp}
 if x + 1 * 0 < 0 + 1 then
   read x
-end
+end;
 
 {simple exp}
 if 0 then
   read x
-end
+end;
 
 if 0 then
   read x
 end;
-read x
+read x;
 
 {brackets in exp}
 if (((((((0))))))) then
   read x
-end
+end;
 
 {4 nested if}
 if 0 then
@@ -61,17 +61,17 @@ if 0 then
   end
 else
   read x
-end
+end;
 
 {repeat}
 repeat
   write 1
-until 0
+until 0;
 
 repeat
   write 1
 until 0;
-write 1
+write 1;
 
 {nested repeat and if}
 repeat
