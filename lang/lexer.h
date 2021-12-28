@@ -9,9 +9,12 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <QString>
+#include <QDebug>
 
 #include "parser.h"
 #include "token.h"
+#include "../ui/render-thread.h"
 
 class Lexer {
 public:
@@ -34,6 +37,10 @@ public:
     auto parser = new Parser(m_tokens);
     TreeNode * node = parser->parse();
     node->print();
+    QString graph(node->dot_representation());
+    qDebug() << graph;
+    RenderThread * thread = new RenderThread(graph);
+    thread->start();
     // End testing
 
     return m_tokens;

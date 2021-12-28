@@ -1,13 +1,14 @@
 #include <iostream>
+#include <queue>
 #include <string>
 #include <vector>
+#include <QTextStream>
 
 #include "tree_node.h"
 
+uint64_t TreeNode::id_counter = 0;
 
-void TreeNode::add_child(TreeNode * child) {
-    m_children.push_back(child);
-}
+void TreeNode::add_child(TreeNode *child) { m_children.push_back(child); }
 
 /*
  * Example:
@@ -21,9 +22,7 @@ void TreeNode::add_child(TreeNode * child) {
  *                 /  \
  *                id   number
  */
-void TreeNode::set_sibling(TreeNode * sibling) {
-    m_sibling = sibling;
-}
+void TreeNode::set_sibling(TreeNode *sibling) { m_sibling = sibling; }
 
 void TreeNode::print() {
   // Printing the token value and token node of the current node.
@@ -46,12 +45,46 @@ void TreeNode::print() {
   return;
 }
 
-TreeNode::~TreeNode() {
-    delete m_sibling;
-    m_sibling = nullptr;
-    for(auto child : m_children) {
-        delete child;
-        child = nullptr;
+QString TreeNode::dot_representation() {
+  QString buffer;
+  QTextStream stream(&buffer);
+
+  std::queue<TreeNode *> q;
+  q.push(this);
+
+  stream << "digraph G { " << "\n";
+
+  while (!q.empty()) {
+    TreeNode * top = q.front();
+    q.pop();
+    QString label = "\\n(" + QString::fromStdString(top->token().value()) + ")";
+    QString shape = " shape=\"" + QString::fromStdString(top->shape()) + "\"";
+
+    stream << top->id() << " [label= \"" << QString::fromStdString(top->token().literal())
+         << label << "\"" << shape << "];" << "\n";
+
+    TreeNode * sibling = top->sibling();
+    if (sibling != nullptr) {
+      q.push(sibling);
+      stream << top->id() << " -> " << sibling->id() << ";" << "\n";
+      stream << "{rank = same; " << top->id() << "; " << sibling->id() << ";}"
+           << "\n";
     }
+
+    for (TreeNode * child : top->children()) {
+      stream << top->id() << " -> " << child->id() << ";" << "\n";
+      q.push(child);
+    }
+  }
+  stream << "}";
+  return stream.readAll();
 }
 
+TreeNode::~TreeNode() {
+  delete m_sibling;
+  m_sibling = nullptr;
+  for (auto child : m_children) {
+    delete child;
+    child = nullptr;
+  }
+}

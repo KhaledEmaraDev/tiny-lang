@@ -12,21 +12,21 @@ public:
 
 private:
     void run() override {
-        m_dot_descrption =
-            "digraph g {\n"
-                "node [shape=plaintext];"
-                "A1 -> B1;"
-                "A2 -> B2;"
-                "A3 -> B3;"
+        // m_dot_descrption =
+        //     "digraph g {\n"
+        //         "node [shape=plaintext];"
+        //         "A1 -> B1;"
+        //         "A2 -> B2;"
+        //         "A3 -> B3;"
 
-                "A1 -> A2;"
-                "A2 -> A3;"
-                "B2 -> B3;"
-                "B1 -> B3;"
+        //         "A1 -> A2;"
+        //         "A2 -> A3;"
+        //         "B2 -> B3;"
+        //         "B1 -> B3;"
 
-                "{ rank=same; A1 A2 A3 }"
-                "{ rank=same; B1 B2 B3 }"
-            "}";
+        //         "{ rank=same; A1 A2 A3 }"
+        //         "{ rank=same; B1 B2 B3 }"
+        //     "}";
 
         QString result = "";
 

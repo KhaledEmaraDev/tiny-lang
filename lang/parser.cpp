@@ -12,7 +12,7 @@ TreeNode * Parser::stmt_sequence() {
   TreeNode * current_node = node;
 
   while (m_tokens[m_idx].type() == Token::Type::SEMICOLON) {
-    match(Token::Type::SEMICOLON);
+    advance();
     current_node->set_sibling(statement());
     current_node = current_node->sibling();
   }
@@ -42,7 +42,7 @@ TreeNode * Parser::statement() {
 }
 
 TreeNode * Parser::if_stmt() {
-  TreeNode * if_node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+  TreeNode * if_node = new TreeNode(m_tokens[m_idx], "box");
 
   match(Token::Type::IF);
   if_node->add_child(exp());
@@ -54,7 +54,7 @@ TreeNode * Parser::if_stmt() {
   if (token_type == Token::Type::END) {
     advance();
   } else if (token_type == Token::Type::ELSE) {
-    TreeNode * else_node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+    TreeNode * else_node = new TreeNode(m_tokens[m_idx], "box");
 
     advance();
     else_node->add_child(stmt_sequence());
@@ -69,7 +69,7 @@ TreeNode * Parser::if_stmt() {
 }
 
 TreeNode * Parser::repeat_stmt() {
-  TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "box");
 
   match(Token::Type::REPEAT);
   node->add_child(stmt_sequence());
@@ -81,11 +81,11 @@ TreeNode * Parser::repeat_stmt() {
 
 TreeNode * Parser::assign_stmt() {
   // I not sure but shouldn't it be
-  // TreeNode * node = new TreeNode(Token(Token::Type::ASSIGN, ":="), "RECTANGLE");
-  // node->add_child(new TreeNode(m_tokens[m_idx], "ELLIPSE"))
+  // TreeNode * node = new TreeNode(Token(Token::Type::ASSIGN, ":="), "box");
+  // node->add_child(new TreeNode(m_tokens[m_idx], "ellipse"))
   // however
   Token mysterious_token(Token::Type::ASSIGN, m_tokens[m_idx].value());
-  TreeNode * node = new TreeNode(mysterious_token, "RECTANGLE");
+  TreeNode * node = new TreeNode(mysterious_token, "box");
 
   match(Token::Type::IDENTIFIER);
   match(Token::Type::ASSIGN);
@@ -98,12 +98,12 @@ TreeNode * Parser::assign_stmt() {
 TreeNode * Parser::read_stmt() {
   match(Token::Type::READ);
   Token mysterious_token(Token::Type::READ, m_tokens[m_idx].value());
-  TreeNode * node = new TreeNode(mysterious_token, "RECTANGLE");
+  TreeNode * node = new TreeNode(mysterious_token, "box");
 
   // Again shouldn't it be
-  // TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+  // TreeNode * node = new TreeNode(m_tokens[m_idx], "box");
   // match(Token::Type::READ);
-  // node->add_child(new TreeNode(m_tokens[m_idx], "ELLIPSE"));
+  // node->add_child(new TreeNode(m_tokens[m_idx], "ellipse"));
 
   match(Token::Type::IDENTIFIER);
 
@@ -111,7 +111,7 @@ TreeNode * Parser::read_stmt() {
 }
 
 TreeNode * Parser::write_stmt() {
-  TreeNode * node = new TreeNode(m_tokens[m_idx], "RECTANGLE");
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "box");
 
   match(Token::Type::WRITE);
   node->add_child(exp());
@@ -134,7 +134,7 @@ TreeNode * Parser::exp() {
 }
 
 TreeNode * Parser::comparison_op() {
-  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ellipse");
 
   Token::Type token_type = m_tokens[m_idx].type();
 
@@ -165,7 +165,7 @@ TreeNode * Parser::simple_exp() {
 }
 
 TreeNode * Parser::add_op() {
-  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ellipse");
 
   Token::Type token_type = m_tokens[m_idx].type();
 
@@ -197,7 +197,7 @@ TreeNode * Parser::term() {
 }
 
 TreeNode * Parser::mul_op() {
-  TreeNode * node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+  TreeNode * node = new TreeNode(m_tokens[m_idx], "ellipse");
 
   Token::Type token_type = m_tokens[m_idx].type();
 
@@ -221,10 +221,10 @@ TreeNode * Parser::factor() {
     node = exp();
     match(Token::Type::CLOSEDBRACKET);
   } else if (token_type == Token::Type::NUMBER) {
-    node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+    node = new TreeNode(m_tokens[m_idx], "ellipse");
     advance();
   } else if (token_type == Token::Type::IDENTIFIER) {
-    node = new TreeNode(m_tokens[m_idx], "ELLIPSE");
+    node = new TreeNode(m_tokens[m_idx], "ellipse");
     advance();
   } else {
      fail();
