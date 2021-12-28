@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <stack>
 #include <string>
 #include <vector>
 #include <QTextStream>
@@ -52,7 +53,7 @@ QString TreeNode::dot_representation() {
   std::queue<TreeNode *> q;
   q.push(this);
 
-  stream << "digraph G { " << "\n";
+  stream << "graph G { \n";
 
   while (!q.empty()) {
     TreeNode * top = q.front();
@@ -66,15 +67,27 @@ QString TreeNode::dot_representation() {
     TreeNode * sibling = top->sibling();
     if (sibling != nullptr) {
       q.push(sibling);
-      stream << top->id() << " -> " << sibling->id() << ";" << "\n";
+      stream << top->id() << " -- " << sibling->id() << ";" << "\n";
       stream << "{rank = same; " << top->id() << "; " << sibling->id() << ";}"
            << "\n";
     }
 
-    for (TreeNode * child : top->children()) {
-      stream << top->id() << " -> " << child->id() << ";" << "\n";
+    for (TreeNode * child :  top->children()) {
+      stream << top->id() << " -- " << child->id() << ";" << "\n";
       q.push(child);
     }
+
+    // for order
+    std::vector<TreeNode*> top_children = top->children();
+    if(top_children.size() > 1) {
+      stream << "{\nedge[style=invis];\n";
+      for (int i = 1; i < top_children.size(); i++) {
+        stream << top_children[i - 1]->id() << " -- " << top_children[i]->id() << ";\n";
+        stream << "{rank = same; " << top_children[i - 1]->id() << "; " << top_children[i]->id() << ";}" << "\n";
+      }
+      stream << "}\n";
+    }
+
   }
   stream << "}";
   return stream.readAll();
