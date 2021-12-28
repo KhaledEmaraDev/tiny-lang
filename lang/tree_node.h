@@ -47,6 +47,15 @@ private:
   std::string m_shape;
   uint64_t m_id;
   static uint64_t id_counter;
+
+  inline static const std::string labels[] = {
+      "if",        "then",     "else",        "end",
+      "repeat",    "until",    "read",        "write",
+      "op",        "op",       "op",          "op",
+      "op",        "op",       "open bracket", "closed bracket",
+      "semicolon", "assign",   "const",      "id",
+      "none"
+  };
 };
 
 #endif

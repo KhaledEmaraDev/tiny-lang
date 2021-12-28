@@ -1,0 +1,89 @@
+{assignment}
+x := 1;
+x := x + 1;
+x := x - 1;
+x := x * 1;
+x := x / 1;
+x := 1 + 1 + 1 + 1 + 1
+
+{expression}
+{arithmetic and brackets}
+x := 1 * 2 / 3 + 4 - 5 + ((6 + 7)) * (((((8))) + x))
+{arithmetic and comparison}
+x := (((0 = 1))) + 1 / (0 < 0)
+{comparison without brackets}
+x := 0 = 0
+{multiple comaprison expressions}
+x := 0 = (((((0 < 0) < 0) < 0) = 0) = 0)
+
+{read}
+read x
+read AZaz
+
+{write}
+write x
+
+{if statement}
+{operations in exp}
+if x + 1 * 0 < 0 + 1 then
+  read x
+end
+
+{simple exp}
+if 0 then
+  read x
+end
+
+if 0 then
+  read x
+end;
+read x
+
+{brackets in exp}
+if (((((((0))))))) then
+  read x
+end
+
+{4 nested if}
+if 0 then
+  if 1 then
+    if 2 then
+      if 3 then
+        read x
+      else
+        read x
+      end
+    else
+      read x
+    end
+  else
+    read x
+  end
+else
+  read x
+end
+
+{repeat}
+repeat
+  write 1
+until 0
+
+repeat
+  write 1
+until 0;
+write 1
+
+{nested repeat and if}
+repeat
+  if 0 then
+    repeat
+      if 0 then
+        repeat
+          write 2
+        until 0
+      else
+        write 1
+      end
+    until 0
+  end
+until 0

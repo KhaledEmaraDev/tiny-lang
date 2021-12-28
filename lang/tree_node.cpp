@@ -61,31 +61,28 @@ QString TreeNode::dot_representation() {
     QString label = "\\n(" + QString::fromStdString(top->token().value()) + ")";
     QString shape = " shape=\"" + QString::fromStdString(top->shape()) + "\"";
 
-    stream << top->id() << " [label= \"" << QString::fromStdString(top->token().literal())
-         << label << "\"" << shape << "];" << "\n";
+    stream << top->id() << " [label= \"" << QString::fromStdString(labels[top->token().type()])
+           << label << "\"" << shape << "];" << "\n";
 
     TreeNode * sibling = top->sibling();
     if (sibling != nullptr) {
       q.push(sibling);
       stream << top->id() << " -- " << sibling->id() << ";" << "\n";
-      stream << "{rank = same; " << top->id() << "; " << sibling->id() << ";}"
-           << "\n";
+      stream << "{rank = same; " << top->id() << "; " << sibling->id() << ";}\n";
     }
 
-    for (TreeNode * child :  top->children()) {
+    std::vector<TreeNode*> top_children = top->children();
+    for (TreeNode * child :  top_children) {
       stream << top->id() << " -- " << child->id() << ";" << "\n";
       q.push(child);
     }
 
     // for order
-    std::vector<TreeNode*> top_children = top->children();
     if(top_children.size() > 1) {
-      stream << "{\nedge[style=invis];\n";
       for (int i = 1; i < top_children.size(); i++) {
-        stream << top_children[i - 1]->id() << " -- " << top_children[i]->id() << ";\n";
-        stream << "{rank = same; " << top_children[i - 1]->id() << "; " << top_children[i]->id() << ";}" << "\n";
+        stream << top_children[i - 1]->id() << " -- " << top_children[i]->id() << " [style=invis];\n";
+        stream << "{rank = same; " << top_children[i - 1]->id() << "; " << top_children[i]->id() << ";}\n";
       }
-      stream << "}\n";
     }
 
   }

@@ -79,7 +79,7 @@ private:
   void push_token_back(Token::Type type, std::string literal) {
     std::string lexeme =
         m_source_code.substr(m_start_idx, m_current_idx - m_start_idx);
-    m_tokens.push_back(Token(type, lexeme));
+    m_tokens.push_back(Token(type, lexeme, m_current_line));
   }
 
   void log_error(int line, std::string message) {

@@ -35,13 +35,13 @@ public:
       NONE
     };
 
-  Token() : m_type(NONE) {}
+  Token() : m_type(NONE), m_line(1) {}
 
   Token(Type type)
-      : m_type(type) {}
+      : m_type(type), m_line(1) {}
 
-  Token(Type type, std::string lexeme)
-      : m_type(type), m_lexeme(lexeme) {}
+  Token(Type type, std::string lexeme, int line = 1)
+      : m_type(type), m_lexeme(lexeme), m_line(line) {}
 
 
   friend std::ostream &operator<<(std::ostream &stream, const Token &token) {
@@ -62,6 +62,8 @@ public:
 
   std::string value() { return m_lexeme; }
 
+  int line() { return m_line; }
+
 private:
   inline static const std::string type_name[] = {
       "IF",        "THEN",     "ELSE",        "END",
@@ -72,6 +74,7 @@ private:
       "NONE"};
   Type m_type;
   std::string m_lexeme;
+  int m_line;
 };
 
 #endif

@@ -36,12 +36,18 @@ private:
   }
 
   void fail() {
-      throw "Unexpected token '" + m_tokens[m_idx].value() + "'\n";
+      throw std::make_pair(
+        m_tokens[m_idx].line(),
+        "Unexpected token '" + m_tokens[m_idx].value() + "'"
+      );
   }
 
   void fail(Token::Type expected_type) {
-      throw "Unexpected token '" + m_tokens[m_idx].value() + "', " +
-             "Expected '" + Token(expected_type).literal() + "'\n";
+      throw std::make_pair(
+        m_tokens[m_idx].line(),
+        "Unexpected token '" + m_tokens[m_idx].value() + "', " +
+        "Expected '" + Token(expected_type).literal() + "'"
+      );
   }
 
   void advance() {
