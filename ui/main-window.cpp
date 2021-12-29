@@ -56,7 +56,7 @@ void MainWindow::open()
     if (shouldSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         tr("Open File"),
-                                                        "../tiny_lang/data",
+                                                        "../tiny-lang/data",
                                                         "Tiny files (*.tiny)"
                                                         );
 
@@ -77,7 +77,7 @@ bool MainWindow::saveAs()
 {
     QFileDialog dialog(this,
                        tr("Save File As"),
-                       "../tiny_lang/data",
+                       "../tiny-lang/data",
                        "Tiny files (*.tiny)"
                        );
 
@@ -158,10 +158,78 @@ bool MainWindow::parseFile()
 
 void MainWindow::renderTree()
 {
-    RenderThread *renderThread = new RenderThread("");
-    connect(renderThread, &RenderThread::renderFinished, this, &MainWindow::handleRender);
-    connect(renderThread, &RenderThread::finished, renderThread, &QObject::deleteLater);
-    renderThread->start();
+    tokensEditor->clearErrors();
+
+#ifndef QT_NO_CURSOR
+    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+
+    auto tokens_lines = tokensEditor->toPlainText().split('\n');
+    std::vector<Token> tokens_list;
+
+    int i = 1;
+    for (auto const &line : tokens_lines) {
+        auto token_pair = line.split(',');
+        if (token_pair.size() == 2) {
+            try {
+                tokens_list.push_back(
+                            Token(
+                                Token::type_from_string(token_pair[1].toStdString()),
+                            token_pair[0].toStdString(),
+                        i
+                        )
+                        );
+            } catch (const std::string &ex) {
+                statusBar()->showMessage(tr(ex.c_str()));
+#ifndef QT_NO_CURSOR
+                QGuiApplication::restoreOverrideCursor();
+#endif
+                return;
+            }
+        }
+        i++;
+    }
+
+    try {
+        Parser parser(tokens_list);
+        auto root_node = parser.parse();
+
+        if (root_node == nullptr) {
+#ifndef QT_NO_CURSOR
+            QGuiApplication::restoreOverrideCursor();
+#endif
+            return;
+}
+
+        RenderThread *renderThread = new RenderThread(root_node->dot_representation());
+        connect(renderThread, &RenderThread::renderFinished, this, &MainWindow::handleRender);
+        connect(renderThread, &RenderThread::finished, renderThread, &QObject::deleteLater);
+        renderThread->start();
+    } catch (const std::vector<std::pair<int, std::string>> &ex) {
+        bool modified = tokensEditor->document()->isModified();
+        for (const auto &[line, error]: ex) {
+            tokensEditor->displayError(line, QString::fromStdString(error));
+        }
+        tokensEditor->document()->setModified(modified);
+        documentWasModified();
+    } catch (std::pair<int, std::string> &ex) {
+        bool modified = tokensEditor->document()->isModified();
+        tokensEditor->displayError(ex.first, QString::fromStdString(ex.second));
+        tokensEditor->document()->setModified(modified);
+        documentWasModified();
+    } catch (const std::exception &ex) {
+        statusBar()->showMessage(tr(ex.what()));
+    } catch (const std::string &ex) {
+        statusBar()->showMessage(tr(ex.c_str()));
+    } catch (const QString &ex) {
+        statusBar()->showMessage(ex);
+    } catch (...) {
+        statusBar()->showMessage(tr("An unexpected error occurred"));
+    }
+
+#ifndef QT_NO_CURSOR
+    QGuiApplication::restoreOverrideCursor();
+#endif
 }
 
 bool MainWindow::handleRender(QString result) {
@@ -287,7 +355,7 @@ void MainWindow::setupActions()
     QMenu *codeMenu = menuBar()->addMenu(tr("&Code"));
     QToolBar *codeToolBar = addToolBar(tr("Code"));
 
-    const QIcon parseIcon = QIcon(":/images/parse.png");
+    const QIcon parseIcon = QIcon(":/images/scan.png");
     QAction *parseAct = new QAction(parseIcon, tr("&Parse"), this);
     parseAct->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_P));
     parseAct->setStatusTip(tr("Extraxt Tokens and Print Parse Tree"));

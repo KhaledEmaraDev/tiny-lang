@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 
 class Token {
 public:
@@ -64,6 +65,15 @@ public:
 
   int line() { return m_line; }
 
+  static Type type_from_string(std::string type) {
+    auto type_it = types_map.find(type);
+
+    if (type_it == types_map.end())
+        throw std::string("Couldn't parse type!");
+
+    return type_it->second;
+  }
+
 private:
   inline static const std::string type_name[] = {
       "IF",        "THEN",     "ELSE",        "END",
@@ -72,6 +82,7 @@ private:
       "EQUAL",     "LESSTHAN", "OPENBRACKET", "CLOSEDBRACKET",
       "SEMICOLON", "ASSIGN",   "NUMBER",      "IDENTIFIER",
       "NONE"};
+  static const std::map<std::string, Token::Type> types_map;
   Type m_type;
   std::string m_lexeme;
   int m_line;

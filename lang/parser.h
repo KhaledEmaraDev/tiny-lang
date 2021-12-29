@@ -2,6 +2,7 @@
 #define _PARSER_H_
 
 #include <vector>
+#include <string>
 
 #include "tree_node.h"
 
@@ -38,15 +39,15 @@ private:
   void fail() {
       throw std::make_pair(
         m_tokens[m_idx].line(),
-        "Unexpected token '" + m_tokens[m_idx].value() + "'"
+        std::string("Unexpected token '" + m_tokens[m_idx].value() + "'")
       );
   }
 
   void fail(Token::Type expected_type) {
       throw std::make_pair(
         m_tokens[m_idx].line(),
-        "Unexpected token '" + m_tokens[m_idx].value() + "', " +
-        "Expected '" + Token(expected_type).literal() + "'"
+        std::string("Unexpected token '" + m_tokens[m_idx].value() + "', " +
+        "Expected '" + Token(expected_type).literal() + "'")
       );
   }
 

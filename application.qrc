@@ -7,5 +7,6 @@
         <file>images/parse.png</file>
         <file>images/paste.png</file>
         <file>images/save.png</file>
+        <file>images/scan.png</file>
     </qresource>
 </RCC>

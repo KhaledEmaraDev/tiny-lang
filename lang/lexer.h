@@ -30,17 +30,17 @@ public:
       throw m_errors;
 
     // for testing
-    for (int i = 0; i < m_tokens.size(); ++i) {
-      std::cout << m_tokens[i].value() << " "
-                << m_tokens[i].literal() << std::endl;
-    }
-    auto parser = new Parser(m_tokens);
-    TreeNode * node = parser->parse();
-    node->print();
-    QString graph(node->dot_representation());
-    qDebug() << graph;
-    RenderThread * thread = new RenderThread(graph);
-    thread->start();
+//    for (int i = 0; i < m_tokens.size(); ++i) {
+//      std::cout << m_tokens[i].value() << " "
+//                << m_tokens[i].literal() << std::endl;
+//    }
+//    auto parser = new Parser(m_tokens);
+//    TreeNode * node = parser->parse();
+//    node->print();
+//    QString graph(node->dot_representation());
+//    qDebug() << graph;
+//    RenderThread * thread = new RenderThread(graph);
+//    thread->start();
     // End testing
 
     return m_tokens;

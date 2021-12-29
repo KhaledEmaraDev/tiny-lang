@@ -15,12 +15,14 @@ CONFIG += c++17
 SOURCES += \
     lang/lexer.cpp \
     lang/parser.cpp \
+    lang/token.cpp \
     lang/tree_node.cpp \
     main.cpp \
     ui/code-editor.cpp \
     ui/main-window.cpp \
     ui/svg-view.cpp \
-    ui/tiny-highlighter.cpp
+    ui/tiny-highlighter.cpp \
+    ui/token-highlighter.cpp
 
 HEADERS += \
     lang/lexer.h \
@@ -32,7 +34,8 @@ HEADERS += \
     ui/main-window.h \
     ui/render-thread.h \
     ui/svg-view.h \
-    ui/tiny-highlighter.h
+    ui/tiny-highlighter.h \
+    ui/token-highlighter.h
 
 RESOURCES = application.qrc
 

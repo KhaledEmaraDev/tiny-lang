@@ -4,6 +4,9 @@
 #include <iostream>
 
 TreeNode * Parser::parse() {
+  if (m_tokens.size() == 0)
+    return nullptr;
+
   return stmt_sequence();
 }
 
