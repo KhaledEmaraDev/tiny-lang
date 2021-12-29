@@ -13,21 +13,21 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    lang/lexer.cpp \
+    lang/parser.cpp \
+    lang/tree_node.cpp \
     main.cpp \
-    lang/lexer.cc \
-    lang/parser.cc\
-    lang/treeNode.cc\
     ui/code-editor.cpp \
     ui/main-window.cpp \
     ui/svg-view.cpp \
     ui/tiny-highlighter.cpp
 
 HEADERS += \
-    lang/lexer.hh \
-    lang/tiny.hh\
-    lang/token.hh\
-    lang/parser.hh\
-    lang/treeNode.hh\
+    lang/lexer.h \
+    lang/parser.h \
+    lang/tiny.h \
+    lang/token.h \
+    lang/tree_node.h \
     ui/code-editor.h \
     ui/main-window.h \
     ui/render-thread.h \

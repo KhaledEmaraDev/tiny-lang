@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "ui/render-thread.h"
-#include "lang/tiny.hh"
+#include "lang/tiny.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -56,7 +56,7 @@ void MainWindow::open()
     if (shouldSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         tr("Open File"),
-                                                        "../../tiny-lang/editor/data",
+                                                        "../tiny_lang/data",
                                                         "Tiny files (*.tiny)"
                                                         );
 
@@ -77,7 +77,7 @@ bool MainWindow::saveAs()
 {
     QFileDialog dialog(this,
                        tr("Save File As"),
-                       "../../tiny-lang/editor/data",
+                       "../tiny_lang/data",
                        "Tiny files (*.tiny)"
                        );
 
@@ -130,9 +130,14 @@ bool MainWindow::parseFile()
         return true;
     } catch (const std::vector<std::pair<int, std::string>> &ex) {
         bool modified = tinyEditor->document()->isModified();
-        for (const auto &error: ex) {
-            tinyEditor->displayError(error.first, QString::fromStdString(error.second));
+        for (const auto &[line, error]: ex) {
+            tinyEditor->displayError(line, QString::fromStdString(error));
         }
+        tinyEditor->document()->setModified(modified);
+        documentWasModified();
+    } catch (std::pair<int, std::string> &ex) {
+        bool modified = tinyEditor->document()->isModified();
+        tinyEditor->displayError(ex.first, QString::fromStdString(ex.second));
         tinyEditor->document()->setModified(modified);
         documentWasModified();
     } catch (const std::exception &ex) {

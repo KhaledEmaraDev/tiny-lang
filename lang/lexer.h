@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _LEXER_H_
+#define _LEXER_H_
 
 #include <cctype>
 #include <cstdio>
@@ -8,9 +9,12 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <QString>
+#include <QDebug>
 
-#include "parser.hh"
-#include "token.hh"
+#include "parser.h"
+#include "token.h"
+#include "../ui/render-thread.h"
 
 class Lexer {
 public:
@@ -27,12 +31,16 @@ public:
 
     // for testing
     for (int i = 0; i < m_tokens.size(); ++i) {
-      std::cout << m_tokens[i].get_token_value() << " "
-                << m_tokens[i].get_token_literal() << std::endl;
+      std::cout << m_tokens[i].value() << " "
+                << m_tokens[i].literal() << std::endl;
     }
     auto parser = new Parser(m_tokens);
-    TreeNode node = parser->program();
-    node.print_tree();
+    TreeNode * node = parser->parse();
+    node->print();
+    QString graph(node->dot_representation());
+    qDebug() << graph;
+    RenderThread * thread = new RenderThread(graph);
+    thread->start();
     // End testing
 
     return m_tokens;
@@ -71,7 +79,7 @@ private:
   void push_token_back(Token::Type type, std::string literal) {
     std::string lexeme =
         m_source_code.substr(m_start_idx, m_current_idx - m_start_idx);
-    m_tokens.push_back(Token(type, m_current_line, lexeme, literal));
+    m_tokens.push_back(Token(type, lexeme, m_current_line));
   }
 
   void log_error(int line, std::string message) {
@@ -89,3 +97,5 @@ private:
 
   static const std::unordered_map<std::string, Token::Type> keywords;
 };
+
+#endif

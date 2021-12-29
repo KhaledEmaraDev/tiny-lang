@@ -1,5 +1,5 @@
 { Sample program in TINY language – computes factorial }
-read y; {input an integer }
+read x; {input an integer }
 if 0 < x then { don’t compute if x <= 0 }
    fact := 1;
    repeat

@@ -1,12 +1,13 @@
-#pragma once
+#ifndef _TINY_H_
+#define _TINY_H_
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include "lexer.hh"
-#include "token.hh"
+#include "lexer.h"
+#include "token.h"
 
 class Tiny {
 public:
@@ -20,3 +21,5 @@ public:
 private:
   std::string m_source_code;
 };
+
+#endif
