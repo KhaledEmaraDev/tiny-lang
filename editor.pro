@@ -1,4 +1,6 @@
-QT       += core gui
+QT       += core gui svg
+
+qtHaveModule(opengl): QT += opengl
 
 #requires(qtConfig(filedialog))
 
@@ -10,32 +12,26 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-LIBS += -L$$OUT_PWD/../lib -lQGVCore
-INCLUDEPATH += $$PWD/../QGVCore
-DEPENDPATH += $$PWD/../QGVCore
-
-!include(../QGVCore/GraphViz.pri) {
-    error("fail open GraphViz.pri")
-}
-
 SOURCES += \
+    lang/lexer.cpp \
+    lang/parser.cpp \
+    lang/tree_node.cpp \
     main.cpp \
-    lang/lexer.cc \
     ui/code-editor.cpp \
     ui/main-window.cpp \
-    ui/parsetree-graph.cpp \
-    ui/scrollable-graphics-view.cpp \
+    ui/svg-view.cpp \
     ui/tiny-highlighter.cpp
 
 HEADERS += \
-    lang/lexer.hh \
-    lang/magic_enum.hh\
-    lang/tiny.hh\
-    lang/token.hh\
+    lang/lexer.h \
+    lang/parser.h \
+    lang/tiny.h \
+    lang/token.h \
+    lang/tree_node.h \
     ui/code-editor.h \
     ui/main-window.h \
-    ui/parsetree-graph.h \
-    ui/scrollable-graphics-view.h \
+    ui/render-thread.h \
+    ui/svg-view.h \
     ui/tiny-highlighter.h
 
 RESOURCES = application.qrc

@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 #include <QTextStream>
+#include <QDebug>
 
 #include <iostream>
 #include <sstream>
@@ -9,7 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "lang/tiny.hh"
+#include "ui/render-thread.h"
+#include "lang/tiny.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -54,7 +56,7 @@ void MainWindow::open()
     if (shouldSave()) {
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         tr("Open File"),
-                                                        "../../tiny-lang/editor/data",
+                                                        "../tiny_lang/data",
                                                         "Tiny files (*.tiny)"
                                                         );
 
@@ -75,7 +77,7 @@ bool MainWindow::saveAs()
 {
     QFileDialog dialog(this,
                        tr("Save File As"),
-                       "../../tiny-lang/editor/data",
+                       "../tiny_lang/data",
                        "Tiny files (*.tiny)"
                        );
 
@@ -128,9 +130,14 @@ bool MainWindow::parseFile()
         return true;
     } catch (const std::vector<std::pair<int, std::string>> &ex) {
         bool modified = tinyEditor->document()->isModified();
-        for (const auto &error: ex) {
-            tinyEditor->displayError(error.first, QString::fromStdString(error.second));
+        for (const auto &[line, error]: ex) {
+            tinyEditor->displayError(line, QString::fromStdString(error));
         }
+        tinyEditor->document()->setModified(modified);
+        documentWasModified();
+    } catch (std::pair<int, std::string> &ex) {
+        bool modified = tinyEditor->document()->isModified();
+        tinyEditor->displayError(ex.first, QString::fromStdString(ex.second));
         tinyEditor->document()->setModified(modified);
         documentWasModified();
     } catch (const std::exception &ex) {
@@ -147,6 +154,28 @@ bool MainWindow::parseFile()
 #endif
 
     return false;
+}
+
+void MainWindow::renderTree()
+{
+    RenderThread *renderThread = new RenderThread("");
+    connect(renderThread, &RenderThread::renderFinished, this, &MainWindow::handleRender);
+    connect(renderThread, &RenderThread::finished, renderThread, &QObject::deleteLater);
+    renderThread->start();
+}
+
+bool MainWindow::handleRender(QString result) {
+    Q_UNUSED(result)
+
+    if (!QFileInfo::exists("parsetree.svg") || !parseTreeView->openFile("parsetree.svg")) {
+        QMessageBox::critical(this, tr("Render Parse Tree"),
+                              tr("Couldn't load tree."));
+        return false;
+    }
+
+    tabber->setCurrentIndex(2);
+
+    return true;
 }
 
 void MainWindow::setupEditor()
@@ -167,9 +196,13 @@ void MainWindow::setupEditor()
     tokensEditor = new CodeEditor;
     tokensEditor->setFont(font);
 
-    parseTreeView = new ScrollableGraphicsView;
-    parseTree = new ParseTreeGraph(parseTreeView);
-    parseTreeView->setScene(parseTree->qgvScene);
+    parseTreeView = new SvgView;
+    parseTreeView->setAntialiasing(true);
+#ifndef QT_NO_OPENGL
+    parseTreeView->setRenderer(SvgView::OpenGL);
+#else
+    parseTreeView->setRenderer(SvgView::Native);
+#endif
 
     tabber = new QTabWidget(this);
     tabber->addTab(tinyEditor, "Tiny File");
@@ -261,6 +294,14 @@ void MainWindow::setupActions()
     connect(parseAct, &QAction::triggered, this, &MainWindow::parseFile);
     codeMenu->addAction(parseAct);
     codeToolBar->addAction(parseAct);
+
+    const QIcon renderIcon = QIcon(":/images/parse.png");
+    QAction *renderAct = new QAction(renderIcon, tr("&Render"), this);
+    renderAct->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
+    renderAct->setStatusTip(tr("Render Parse Tree"));
+    connect(renderAct, &QAction::triggered, this, &MainWindow::renderTree);
+    codeMenu->addAction(renderAct);
+    codeToolBar->addAction(renderAct);
 
     menuBar()->addSeparator();
 

@@ -1,5 +1,5 @@
-#include "lexer.hh"
-#include "token.hh"
+#include "lexer.h"
+#include "token.h"
 
 #include <algorithm>
 #include <cctype>
@@ -39,7 +39,7 @@ void Lexer::scan_token() {
     push_token_back(Token::Type::OPENBRACKET);
     break;
   case ')':
-    push_token_back(Token::Type::OPENBRACKET);
+    push_token_back(Token::Type::CLOSEDBRACKET);
     break;
   case ';':
     push_token_back(Token::Type::SEMICOLON);
