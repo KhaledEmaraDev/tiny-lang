@@ -5,6 +5,7 @@
 
 #include "code-editor.h"
 #include "tiny-highlighter.h"
+#include "token-highlighter.h"
 #include "ui/svg-view.h"
 
 QT_BEGIN_NAMESPACE
@@ -55,6 +56,7 @@ private:
     QTabWidget *tabber;
     CodeEditor *tinyEditor;
     TinyHighlighter *tinyHighlighter;
+    TokenHighlighter *tokenHighlighter;
     CodeEditor *tokensEditor;
     SvgView *parseTreeView;
 

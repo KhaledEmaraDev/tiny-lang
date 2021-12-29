@@ -264,6 +264,8 @@ void MainWindow::setupEditor()
     tokensEditor = new CodeEditor;
     tokensEditor->setFont(font);
 
+    tokenHighlighter = new TokenHighlighter(tokensEditor->document());
+
     parseTreeView = new SvgView;
     parseTreeView->setAntialiasing(true);
 #ifndef QT_NO_OPENGL
